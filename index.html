@@ -3,87 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensor Data</title>
+    <title>Gyroscope Data</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #282c36;
-            color: white;
             text-align: center;
-            flex-direction: column;
-        }
-        .container {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        .data {
-            font-size: 1.2em;
-            margin: 5px 0;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 15px;
-            font-size: 1em;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #ff9800;
-            color: white;
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Live Sensor Data</h1>
-        <div class="data">Gyroscope: <span id="gyro">Waiting...</span></div>
-        <div class="data">Accelerometer: <span id="accel">Waiting...</span></div>
-        <button onclick="requestPermissions()">Enable Sensors</button>
-    </div>
+    <h1>Gyroscope Data</h1>
+    <p>Alpha (Z-axis rotation): <span id="alpha">0</span></p>
+    <p>Beta (X-axis rotation): <span id="beta">0</span></p>
+    <p>Gamma (Y-axis rotation): <span id="gamma">0</span></p>
+    <button onclick="requestPermission()">Enable Gyroscope</button>
 
     <script>
-        function requestPermissions() {
-            if (typeof DeviceMotionEvent.requestPermission === "function") {
-                DeviceMotionEvent.requestPermission().then(permissionState => {
-                    if (permissionState === "granted") {
-                        startSensors();
+        function requestPermission() {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(permissionState => {
+                    if (permissionState === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
                     } else {
-                        alert("Permission denied. Please allow access to motion sensors.");
+                        alert('Permission denied');
                     }
                 }).catch(console.error);
             } else {
-                startSensors(); // No permission needed in some browsers
+                // For non-iOS devices
+                window.addEventListener('deviceorientation', handleOrientation);
             }
         }
 
-        function startSensors() {
-            if ("ondevicemotion" in window) {
-                window.addEventListener("devicemotion", function(event) {
-                    let accel = event.accelerationIncludingGravity;
-                    document.getElementById("accel").innerText = 
-                        `X: ${accel.x.toFixed(2)}, Y: ${accel.y.toFixed(2)}, Z: ${accel.z.toFixed(2)}`;
-                });
-            } else {
-                document.getElementById("accel").innerText = "Not supported on this device.";
-            }
-
-            if ("ondeviceorientation" in window) {
-                window.addEventListener("deviceorientation", function(event) {
-                    document.getElementById("gyro").innerText = 
-                        `Alpha: ${event.alpha.toFixed(2)}, Beta: ${event.beta.toFixed(2)}, Gamma: ${event.gamma.toFixed(2)}`;
-                });
-            } else {
-                document.getElementById("gyro").innerText = "Not supported on this device.";
-            }
+        function handleOrientation(event) {
+            document.getElementById('alpha').textContent = event.alpha.toFixed(2);
+            document.getElementById('beta').textContent = event.beta.toFixed(2);
+            document.getElementById('gamma').textContent = event.gamma.toFixed(2);
         }
     </script>
 </body>
